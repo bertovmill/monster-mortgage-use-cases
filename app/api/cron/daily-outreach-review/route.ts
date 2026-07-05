@@ -12,26 +12,17 @@ export async function GET(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const now = new Date();
-
   const overdueContacts = ALL_CONTACTS
-    .map((c) => {
-      const lastTouchDate = new Date(c.lastTouch);
-      const daysSince = Math.floor(
-        (now.getTime() - lastTouchDate.getTime()) / (1000 * 60 * 60 * 24)
-      );
-      return { ...c, daysSince };
-    })
-    .filter((c) => c.daysSince >= 90)
-    .sort((a, b) => b.daysSince - a.daysSince);
+    .filter((c) => c.daysSinceContact >= 90)
+    .sort((a, b) => b.daysSinceContact - a.daysSinceContact);
 
-  const highPriority = overdueContacts.filter((c) => c.daysSince >= 150);
+  const highPriority = overdueContacts.filter((c) => c.daysSinceContact >= 150);
 
   const contactSummary = overdueContacts
     .slice(0, 10)
     .map(
       (c) =>
-        `${c.name} (${c.type}) — ${c.daysSince} days overdue${c.daysSince >= 150 ? " ⚠️ HIGH PRIORITY" : ""} | Notes: ${c.notes}`
+        `${c.firstName} ${c.lastName} (${c.contactType}) — ${c.daysSinceContact} days overdue${c.daysSinceContact >= 150 ? " HIGH PRIORITY" : ""} | Notes: ${c.notes}`
     )
     .join("\n");
 
