@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { ALL_FILES } from "@/lib/mock-file-data";
+import { MOCK_FILES } from "@/lib/mock-file-data";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -12,18 +12,17 @@ export async function GET(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const activeFiles = ALL_FILES.filter((f) =>
+  const activeFiles = MOCK_FILES.filter((f) =>
     ["Conditions", "Clear to Close"].includes(f.stage)
   ).sort((a, b) => {
-    const urgency = { urgent: 0, soon: 1, normal: 2 };
-    return (urgency[a.priority as keyof typeof urgency] ?? 2) -
-           (urgency[b.priority as keyof typeof urgency] ?? 2);
+    const urgency: Record<string, number> = { urgent: 0, active: 1, smooth: 2 };
+    return (urgency[a.priority] ?? 2) - (urgency[b.priority] ?? 2);
   });
 
   const filesSummary = activeFiles
     .map(
       (f) =>
-        `File: ${f.clientName} | Stage: ${f.stage} | Priority: ${f.priority} | Outstanding: ${f.outstanding.join(", ") || "none"}`
+        `File: ${f.clients} | Stage: ${f.stage} | Priority: ${f.priority} | Closing: ${f.closingDate} (${f.daysToClose}d) | Notes: ${f.notes}`
     )
     .join("\n");
 
